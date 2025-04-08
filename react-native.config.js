@@ -1,3 +1,4 @@
+
 module.exports = {
     project : {
         ios:{},
@@ -15,4 +16,5 @@ module.exports = {
     getSourceExts(){
         return ['ts', 'tsx']
     }
+
 }
