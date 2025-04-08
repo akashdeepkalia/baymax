@@ -23,7 +23,7 @@ export const useWaterStore = create<WaterSotre>()(
             }
         }),
         {
-            name: 'waterStore',
+            name: 'pedometer-storage',
             storage: createJSONStorage(()=>mmkvStorage)
         }
     )

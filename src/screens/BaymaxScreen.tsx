@@ -139,6 +139,7 @@ const BaymaxScreen = () => {
             startBlur();
             setMessage('');
             setShowPedometer(false);
+            setShowInstructions(false);
             setShowLoader(true);
             SoundPlayer.stop();
           }}
@@ -155,6 +156,10 @@ const BaymaxScreen = () => {
       {!showInstructions &&
         <BigHero6 onPress={onOptionPressHandler} />
       }
+
+      {/* {!showPedometer &&
+        <BigHero6 onPress={onOptionPressHandler} />
+      } */}
 
       <Background blurOpacity={bO}/>
     </View>

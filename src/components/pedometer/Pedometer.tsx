@@ -1,23 +1,82 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'
-import React, { FC } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert } from 'react-native'
+import React, { FC, useEffect } from 'react'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { RFValue } from 'react-native-responsive-fontsize'
+import { usePedometerStore } from '../../state/pedometerStore'
+import StepCounter, { parseStepData, startStepCounterUpdate, stopStepCounterUpdate } from '@dongminyu/react-native-step-counter'
+import { playTTS } from '../../utils/ttsListenres'
+import CircularProgress from 'react-native-circular-progress-indicator'
+import { Fonts } from '../../utils/Constants'
+import CustomText from '../global/CustomText'
 
 const Pedometer :FC<{
   message: string;
   onCross: () => void;
 }> = ({message, onCross}) => {
 
+  const {stepCount, dailyGoal, addSteps} = usePedometerStore()
+  
+  StepCounter.addListener('StepCounter.stepsSensorInfo')
+
+  const startStepCounter = () => {      // callback fxn
+    startStepCounterUpdate(new Date(), (data)=>{
+      const parsedData = parseStepData(data)
+      addSteps(parsedData.steps, parsedData.distance)
+    })
+  }
+
+  const stopStepCounter = () => {
+    stopStepCounterUpdate()
+  }
+  
+  useEffect(() => {
+    console.log("outside return")
+    if (stepCount > dailyGoal){
+      playTTS("Congratulations! you hit your daily goal")
+    } else{
+      startStepCounter()
+    }
+
+    // cleanUp fxn
+    return () => {
+      console.log("inside return")
+      stopStepCounter()
+    }
+  }, [])
+
   return (
     <View style={styles.container}>
 
-      <TouchableOpacity style={styles.cross} onPress={onCross}>
+      <TouchableOpacity style={styles.cross} onPress={()=>{
+        Alert.alert("Your step counter is stopped!")
+        stopStepCounter()
+        onCross()
+        }}
+        >
         <Icon name='close-circle' color='red' size={RFValue(20)} />
       </TouchableOpacity>
 
       <Image style={styles.logo} source={require('../../assets/images/logo_short.png')} />
 
-      <View>
+      <View style={styles.indicator}>
+        <CircularProgress 
+          value={stepCount}
+          maxValue={dailyGoal}
+          valueSuffix='/2000'
+          progressValueFontSize={22}
+          radius={120}
+          activeStrokeColor='#cdd27e'
+          inActiveStrokeColor='#4c6394'
+          inActiveStrokeWidth={20}
+          activeStrokeWidth={20}
+          title='Steps'
+          titleColor='#555'
+          titleFontSize={22}
+          titleStyle={{fontFamily: Fonts.SemiBold}}
+        />
+        <CustomText fontSize={RFValue(8)} fontFamily={Fonts.SemiBold} style={styles.text}>
+          Start Walking, counter will update automatically.
+        </CustomText>
       </View>
     </View>
   )
@@ -37,6 +96,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     borderRadius: 16,
     elevation: 10,
+  },
+  text:{
+    marginTop: 20,
+    textAlign: 'center'
+  },
+  indicator:{
+    marginTop: 10,
+    marginBottom: 20,
+    justifyContent: 'center',
+    alignSelf: 'center',
+    alignItems: 'center'
   },
   logo:{
     width: 50,
