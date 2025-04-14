@@ -23,6 +23,9 @@ const Water = () => {
     if(completedStamps < totalStamps){
       const timestamp = new Date().toISOString()
       addWaterIntake(timestamp)
+      setTimeout(() => {
+        playTTS("Good Work, Stay Hydrated")
+      }, 1000);
     }else{
       playTTS("Congrats! You have completed your daily water intake.")
     }
